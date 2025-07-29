@@ -7,13 +7,16 @@ from dotenv import load_dotenv
 
 def handle_response(prompt):
     if st.session_state.conversation:
+        with st.chat_message("user"):
+            st.write(prompt)
         #add user message to session state
         st.session_state.messages.append({"role": "user", "content": prompt})
         response = st.session_state.conversation({"question": prompt})
-        #add assistant response to session state
-        st.session_state.messages.append({"role": "assistant", "content": response["answer"]})
         with st.chat_message("assistant"):
             st.write(response["answer"])
+        #add assistant response to session state
+        st.session_state.messages.append({"role": "assistant", "content": response["answer"]})
+        
     else:
         st.error("Please upload two PDF files to start the conversation.")
         
@@ -46,7 +49,6 @@ def main():
     prompt = st.chat_input("Ask something")
     if prompt:
         handle_response(prompt)
-        st.rerun()
 
     with st.sidebar:
         st.title("Upload PDF Files")
