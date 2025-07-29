@@ -5,6 +5,18 @@ import vector_store as vector_db
 import conversation_chain as conversation_chain
 from dotenv import load_dotenv
 
+def handle_response(prompt):
+    if st.session_state.conversation:
+        #add user message to session state
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        response = st.session_state.conversation({"question": prompt})
+        #add assistant response to session state
+        st.session_state.messages.append({"role": "assistant", "content": response["answer"]})
+        with st.chat_message("assistant"):
+            st.write(response["answer"])
+    else:
+        st.error("Please upload two PDF files to start the conversation.")
+        
 st.markdown(
     """
     <style>
@@ -21,13 +33,20 @@ def main():
     load_dotenv()
     st.title("Document Analysis App")
 
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
     if "conversation" not in st.session_state:
         st.session_state.conversation = None
 
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
+
     prompt = st.chat_input("Ask something")
     if prompt:
-        with st.chat_message("user"):
-            st.write(prompt)
+        handle_response(prompt)
+        st.rerun()
 
     with st.sidebar:
         st.title("Upload PDF Files")
@@ -44,21 +63,23 @@ def main():
             st.warning("You can only upload up to two pdf files.")
 
         submit_button = st.button(label="Submit", disabled=len(uploaded_files) != 2)
-                  
+       
 
         if submit_button:
             with st.spinner("Processing..."):
-                for uploaded_file in uploaded_files:
-                    if uploaded_file is not None:
-                        #extract text from the PDF file
-                        extract_text = pdf.extract_text_from_pdf(uploaded_file)
-                        #get chunked text
-                        chunk_text = text_chunker.chunk_text(extract_text)
-                        #get vector store
-                        vectorstore = vector_db.get_vectorstore(chunk_text)
-                        #create conversation chain
-                        st.session_state.conversation = conversation_chain.get_conversation_chain(vectorstore)
+                if uploaded_files is not None:
+                    #extract text from the PDF file
+                    extract_text = pdf.extract_text_from_pdf(uploaded_files)
+                    #get chunked text
+                    chunk_text = text_chunker.chunk_text(extract_text)
+                    st.write("Chunked Text:", chunk_text)
+                    #get vector store
+                    vectorstore = vector_db.get_vectorstore(chunk_text)
+                    #create conversation chain
+                    st.session_state.conversation = conversation_chain.get_conversation_chain(vectorstore)
+                    st.session_state.messages = []
             st.success("Files processed successfully!")
+            
 
 if __name__ == "__main__":
     main()
