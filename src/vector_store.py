@@ -1,6 +1,5 @@
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
-from langchain.schema import Document
 
 def get_vectorstore(chunks):
     embeddings = HuggingFaceEmbeddings(
