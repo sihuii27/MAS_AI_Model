@@ -9,7 +9,7 @@ def get_conversation_chain(vectorstore):
         model_name="llama-3.3-70b-versatile",
         temperature=0.1,
     )
-    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, output_key="answer", max_token_limit=1000)
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=vectorstore.as_retriever(),

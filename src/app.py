@@ -5,6 +5,8 @@ import vector_store as vector_db
 import conversation_chain as conversation_chain
 from dotenv import load_dotenv
 
+st.set_page_config(page_title="Document Analysis", layout="wide")
+
 def handle_response(prompt):
     if st.session_state.conversation:
         with st.chat_message("user"):
@@ -34,7 +36,7 @@ st.markdown(
 
 def main():
     load_dotenv()
-    st.title("Document Analysis App")
+    st.title("PDF Document Analysis")
 
     if "messages" not in st.session_state:
         st.session_state.messages = []
