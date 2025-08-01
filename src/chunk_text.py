@@ -1,25 +1,26 @@
-from langchain.text_splitter import CharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.schema import Document
+import re
 
-def chunk_text(pdf_file):
-    text_splitter = CharacterTextSplitter(
-        separator="\n\n=====",
-        chunk_size=1000, #1000 characters per chunk
-        chunk_overlap=200, #200 characters overlap
-        length_function=len,
-        is_separator_regex=True
-    )
-    file_section = text_splitter.split_text(pdf_file)
+def chunk_text(pdf_text):
     chunks = []
-    regular_splitter = CharacterTextSplitter(
-        separator="\n",
-        chunk_size=1000, 
-        chunk_overlap=100,
-        length_function=len
-    )
-    for section in file_section:
-        if "File:" in section:
-            # Split the section into chunks
-            section_chunks = regular_splitter.split_text(section)
-            chunks.extend(section_chunks)
-            
+    
+    # split files using regex
+    file_sections = re.split(r"\n+===== File: (.*?) =====\n+", pdf_text)
+    
+    for i in range(1, len(file_sections), 2):
+        file_name = file_sections[i].strip()
+        content = file_sections[i + 1].strip()
+        
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=150,
+            length_function=len,
+            separators=["\n\n", "\n", ".", " ", ""]
+        )
+        
+        section_chunks = splitter.split_text(content)
+        for j, chunk in enumerate(section_chunks):
+            chunks.append(Document(page_content=chunk, metadata={"file_name": file_name, "chunk": j}))
+    
     return chunks

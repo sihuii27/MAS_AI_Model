@@ -12,7 +12,7 @@ def get_conversation_chain(vectorstore):
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True, output_key="answer", max_token_limit=1000)
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
-        retriever=vectorstore.as_retriever(),
+        retriever=vectorstore.as_retriever(search_kwargs={"k": 8}, search_type="mmr"),
         memory=memory,
     )
     return conversation_chain

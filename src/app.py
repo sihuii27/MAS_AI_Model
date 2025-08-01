@@ -13,14 +13,15 @@ def handle_response(prompt):
             st.write(prompt)
         #add user message to session state
         st.session_state.messages.append({"role": "user", "content": prompt})
-        response = st.session_state.conversation({"question": prompt})
+        response = st.session_state.conversation({"question": prompt+ "Be detailed and cite evidence where possible. Provide answers that are in the source documents. Unless the question is not related to the documents."})
+        answer = response["answer"]
         with st.chat_message("assistant"):
-            st.write(response["answer"])
+            st.write(answer)
         #add assistant response to session state
         st.session_state.messages.append({"role": "assistant", "content": response["answer"]})
         
     else:
-        st.error("Please upload two PDF files to start the conversation.")
+        st.error("Please upload PDF files to start the conversation.")
         
 st.markdown(
     """
@@ -60,11 +61,7 @@ def main():
         )
 
         if len(uploaded_files)== 0:
-            st.warning("Please upload at least two pdf files.")
-        elif len(uploaded_files) == 1:
-            st.warning("Please upload one more pdf file.")
-        elif len(uploaded_files) > 2:
-            st.warning("You can only upload up to two pdf files.")
+            st.warning("Please upload at least one pdf file.")
 
         submit_button = st.button(label="Submit", disabled=len(uploaded_files) != 2)
        
