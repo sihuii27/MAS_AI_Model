@@ -23,17 +23,6 @@ def handle_response(prompt):
     else:
         st.error("Please upload PDF files to start the conversation.")
         
-st.markdown(
-    """
-    <style>
-    [data-testid="stSidebar"] {
-        min-width: 550px; 
-        max-width: 550px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
 def main():
     load_dotenv()
@@ -67,13 +56,12 @@ def main():
        
 
         if submit_button:
-            with st.spinner("Processing..."):
+            with st.spinner("Processing please wait patiently..."):
                 if uploaded_files is not None:
                     #extract text from the PDF file
                     extract_text = pdf.extract_text_from_pdf(uploaded_files)
                     #get chunked text
                     chunk_text = text_chunker.chunk_text(extract_text)
-                    st.write("Chunked Text:", chunk_text)
                     #get vector store
                     vectorstore = vector_db.get_vectorstore(chunk_text)
                     #create conversation chain
